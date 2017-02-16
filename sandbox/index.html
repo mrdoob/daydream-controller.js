@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>daydream-controller-sandbox</title>
+    <script src="aframe.min.js"></script>
+    <script src="aframe-obj-loader-component.min.js"></script>
+    <script src="DaydreamController.js"></script>
+
+    <style>
+      body,html {
+        margin: 0px;
+        padding: 0px;
+        overflow-y: hidden;
+        overflow-x: hidden;
+        background-color: #fff;
+      }
+      p {
+        color: #fff;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 18px;
+        font-style: normal;
+        font-variant: normal;
+        font-weight: 200;
+        line-height: 25%;
+      }
+    </style>
+  </head>
+  <body>
+    <a-scene>
+      <a-camera id="camera" position="0 0 10"></a-camera>
+      <a-sky color="#4E4E4E"></a-sky>
+      <a-entity id="daydream" obj-loader="src: url(./DayDream_Controller.obj);mtl: url(./DayDream_Controller.mtl);" position="0 0 0" rotation="-90 -180 0" scale="0.1 0.1 0.1">
+      </a-entity>
+    </a-scene>
+    <div style="position:absolute;margin-left:15px;margin-top:15px;z-index:999;">
+      <button id="button">CONNECT</button><br /><br />
+  		<textarea id="textarea" rows="20" cols="50"></textarea><br /><br />
+    </div>
+
+    <script>
+			button.addEventListener( 'click', function ()
+      {
+				var controller = new DaydreamController();
+				controller.onStateChange( function ( state )
+        {
+					textarea.textContent = JSON.stringify( state, null, '\t' );
+          var madgwick = new AHRS(
+          {
+            sampleInterval: 1,
+            algorithm: 'Madgwick',
+            beta: 1.0
+          });
+
+          madgwick.update(state.xGyro, state.yGyro, state.zGyro, state.xAcc, state.yAcc, state.zAcc, state.xOri, state.yOri, state.zOri);
+          var euler = madgwick.getEulerAnglesDegrees();
+
+          document.querySelector('a-entity[id=daydream]').setAttribute('rotation', euler.roll + ' ' +euler.pitch + ' ' +euler.heading);
+				} );
+				controller.connect();
+
+			} );
+		</script>
+  </body>
+</html>
