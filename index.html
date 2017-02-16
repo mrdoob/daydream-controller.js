@@ -13,14 +13,14 @@
 		<a href="https://vr.google.com/daydream/headset/">Daydream View</a>
 
 		<script src="files/three.min.js"></script>
+		<script src="files/MadgwickAHRS.js"></script>
 		<script src="DaydreamController.js"></script>
 
 		<script>
 
 			var mesh;
-
-			var quaternionStart;
-			var quaternionSensor = new THREE.Quaternion();
+			var sensorfusion = new MadgwickAHRS();
+			sensorfusion.setQuaternion( [ 0.7071067811865475, 0, 0, 0.7071067811865475 ] ); // Hack-ish: Rotate internal quaternion
 
 			button.addEventListener( 'click', function () {
 
@@ -29,22 +29,24 @@
 
 					textarea.textContent = JSON.stringify( state, null, '\t' );
 
-					// http://stackoverflow.com/questions/40730809/use-daydream-controller-on-hololens-or-outside-daydream/40753551#40753551
+					var xGyro = state.xGyro * (2048 / 180 * Math.PI / 4095.0);
+					var yGyro = state.yGyro * (2048 / 180 * Math.PI / 4095.0);
+					var zGyro = state.zGyro * (2048 / 180 * Math.PI / 4095.0);
 
-					var axis = new THREE.Vector3( state.xOri, state.yOri, state.zOri );
-					axis.multiplyScalar( 2 * Math.PI / 4095.0 );
-					quaternionSensor.setFromAxisAngle( axis.normalize(), axis.length() );
+					var xAcc = state.xAcc * (8 * 9.8 / 4095.0);
+					var yAcc = state.yAcc * (8 * 9.8 / 4095.0);
+					var zAcc = state.zAcc * (8 * 9.8 / 4095.0);
 
-					if ( quaternionStart === undefined ) {
+					var xOri = state.xOri * (2 * Math.PI / 4095.0);
+					var yOri = state.yOri * (2 * Math.PI / 4095.0);
+					var zOri = state.zOri * (2 * Math.PI / 4095.0);
 
-						quaternionStart = new THREE.Quaternion();
-						quaternionStart.copy( quaternionSensor );
-
-					}
+					sensorfusion.update( xGyro, yGyro, zGyro, xAcc, yAcc, zAcc, xOri, yOri, zOri );
 
 					if ( mesh !== undefined ) {
 
-						mesh.quaternion.multiplyQuaternions( quaternionStart, quaternionSensor );
+						mesh.quaternion.fromArray( sensorfusion.getQuaternion() );
+						mesh.rotation.x -= Math.PI / 2; // Hack: Don't know how to change rotate gyro/acc/ori.
 
 					}
 
