@@ -30,7 +30,7 @@ function DaydreamController() {
 
 	}
 
-	function handleData( data ) {
+	function handleData( event ) {
 
 		var data = event.target.value;
 
