@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>daydream-controller.js</title>
+	</head>
+	<body>
+		<h1>daydream-controller.js</h1>
+		<button id="button">CONNECT</button><br /><br />
+		<textarea id="textarea" rows="20" cols="40"></textarea>
+		<script>
+			button.addEventListener( 'click', function () {
+				navigator.bluetooth.requestDevice( {
+					filters: [ {
+						name: 'Daydream controller'
+					} ],
+					optionalServices: [ '0000fe55-0000-1000-8000-00805f9b34fb' ]
+				} )
+				.then( function ( device ) {
+					return device.gatt.connect();
+				} )
+				.then( function ( server ) {
+					return server.getPrimaryService( '0000fe55-0000-1000-8000-00805f9b34fb' );
+				} )
+				.then( function ( service ) {
+					return service.getCharacteristic( '00000001-1000-1000-8000-00805f9b34fb' );
+				} )
+				.then( function ( characteristic ) {
+					characteristic.addEventListener( 'characteristicvaluechanged', handleCharacteristicValue );
+					characteristic.startNotifications();
+				} )
+				function handleCharacteristicValue( event ) {
+					var data = event.target.value;
+
+					// http://stackoverflow.com/questions/40730809/use-daydream-controller-on-hololens-or-outside-daydream
+
+					var CLICK_BTN = 0x1;
+					var HOME_BTN = 0x2;
+					var APP_BTN = 0x4;
+					var VOL_DOWN_BTN = 0x8;
+					var VOL_UP_BTN = 0x10;
+
+					var isClickDown = (data.getUint8(18) & CLICK_BTN) > 0;
+					var isAppDown = (data.getUint8(18) & APP_BTN) > 0;
+					var isHomeDown = (data.getUint8(18) & HOME_BTN) > 0;
+					var isVolPlusDown = (data.getUint8(18) & VOL_UP_BTN) > 0;
+					var isVolMinusDown = (data.getUint8(18) & VOL_DOWN_BTN) > 0;
+
+					var time = ((data.getUint8(0) & 0xFF) << 1 | (data.getUint8(1) & 0x80) >> 7 );
+
+					var seq = (data.getUint8(1) & 0x7C) >> 2;
+
+					var xOri = (data.getUint8(1) & 0x03) << 11 | (data.getUint8(2) & 0xFF) << 3 | (data.getUint8(3) & 0x80) >> 5;
+					xOri = (xOri << 19) >> 19;
+
+					var yOri = (data.getUint8(3) & 0x1F) << 8 | (data.getUint8(4) & 0xFF);
+					yOri = (yOri << 19) >> 19;
+
+					var zOri = (data.getUint8(5) & 0xFF) << 5 | (data.getUint8(6) & 0xF8) >> 3;
+					zOri = (zOri << 19) >> 19;
+
+					var xAcc = (data.getUint8(6) & 0x07) << 10 | (data.getUint8(7) & 0xFF) << 2 | (data.getUint8(8) & 0xC0) >> 6;
+					xAcc = (xAcc << 19) >> 19;
+
+					var yAcc = (data.getUint8(8) & 0x3F) << 7 | (data.getUint8(9) & 0xFE) >>> 1;
+					yAcc = (yAcc << 19) >> 19;
+
+					var zAcc = (data.getUint8(9) & 0x01) << 12 | (data.getUint8(10) & 0xFF) << 4 | (data.getUint8(11) & 0xF0) >> 4;
+					zAcc = (zAcc << 19) >> 19;
+
+					var xGyro = ((data.getUint8(11) & 0x0F) << 9 | (data.getUint8(12) & 0xFF) << 1 | (data.getUint8(13) & 0x80) >> 7);
+					xGyro = (xGyro << 19) >> 19;
+
+					var yGyro = ((data.getUint8(13) & 0x7F) << 6 | (data.getUint8(14) & 0xFC) >> 2 );
+					yGyro = (yGyro << 19) >> 19;
+
+					var zGyro = ((data.getUint8(14) & 0x03) << 11 | (data.getUint8(15) & 0xFF) << 3 | (data.getUint8(16) & 0xE0) >> 5);
+					zGyro = (zGyro << 19) >> 19;
+
+					var xTouch = ((data.getUint8(16) & 0x1F) << 3 | (data.getUint8(17) & 0xE0) >> 5) / 255.0;
+					var yTouch = ((data.getUint8(17) & 0x1F) << 3 | (data.getUint8(18) & 0xE0) >> 5) / 255.0;
+
+					var state = {
+						isClickDown: isClickDown,
+						isAppDown: isAppDown,
+						isHomeDown: isHomeDown,
+						isVolPlusDown: isVolPlusDown,
+						isVolMinusDown: isVolMinusDown,
+
+						time: time,
+						seq: seq,
+
+						xOri: xOri,
+						yOri: yOri,
+						zOri: zOri,
+
+						xAcc: xAcc,
+						yAcc: yAcc,
+						zAcc: zAcc,
+
+						xGyro: xGyro,
+						yGyro: yGyro,
+						zGyro: zGyro,
+
+						xTouch: xTouch,
+						yTouch: yTouch
+
+					};
+
+					textarea.textContent = JSON.stringify( state, null, '\t' );
+				}
+			} );
+		</script>
+	</body>
+</html>
