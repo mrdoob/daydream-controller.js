@@ -4,23 +4,93 @@
 		<title>daydream-controller.js</title>
 	</head>
 	<body>
+
 		<h1>daydream-controller.js</h1>
 		<button id="button">CONNECT</button><br /><br />
-		<textarea id="textarea" rows="20" cols="50"></textarea><br /><br />
+		<textarea id="textarea" rows="23" cols="50"></textarea>
+		<canvas id="canvas" width="400", height="300"></canvas><br /><br />
 		<a href="https://github.com/mrdoob/daydream-controller.js/">Source</a> -
 		<a href="https://vr.google.com/daydream/headset/">Daydream View</a>
+
+		<script src="files/three.min.js"></script>
 		<script src="DaydreamController.js"></script>
+
 		<script>
+
+			var mesh;
+
+			var quaternionStart;
+			var quaternionSensor = new THREE.Quaternion();
 
 			button.addEventListener( 'click', function () {
 
 				var controller = new DaydreamController();
 				controller.onStateChange( function ( state ) {
+
 					textarea.textContent = JSON.stringify( state, null, '\t' );
+
+					// http://stackoverflow.com/questions/40730809/use-daydream-controller-on-hololens-or-outside-daydream/40753551#40753551
+
+					var axis = new THREE.Vector3( state.xOri, state.yOri, state.zOri );
+					axis.multiplyScalar( 2 * Math.PI / 4095.0 );
+					quaternionSensor.setFromAxisAngle( axis.normalize(), axis.length() );
+
+					if ( quaternionStart === undefined ) {
+
+						quaternionStart = new THREE.Quaternion();
+						quaternionStart.copy( quaternionSensor );
+
+					}
+
+					if ( mesh !== undefined ) {
+
+						mesh.quaternion.multiplyQuaternions( quaternionStart, quaternionSensor );
+
+					}
+
 				} );
 				controller.connect();
 
 			} );
+
+			// 3D
+
+			var renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true } );
+			renderer.setSize( canvas.width, canvas.height );
+
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 0xeeeeee );
+
+			var light = new THREE.HemisphereLight( 0xaaaaff, 0x806060, 0.5 );
+			light.position.set( 0, 1, 0 );
+			scene.add( light );
+
+			var light = new THREE.DirectionalLight( 0xffffff, 0.8 );
+			light.position.set( 1, 1, 1 );
+			scene.add( light );
+
+			var camera = new THREE.PerspectiveCamera( 50, canvas.width / canvas.height, 0.001, 10 );
+			camera.position.z = 0.015;
+
+			var loader = new THREE.BufferGeometryLoader()
+			loader.load( 'files/daydream.json', function ( geometry ) {
+
+				var material = new THREE.MeshPhongMaterial( { color: 0x888888, side: THREE.DoubleSide } );
+				mesh = new THREE.Mesh( geometry, material );
+				mesh.rotation.x = Math.PI / 2;
+				scene.add( mesh );
+
+			} );
+
+			function animate() {
+
+				renderer.render( scene, camera );
+				requestAnimationFrame( animate );
+
+			}
+
+			requestAnimationFrame( animate );
+
 		</script>
 	</body>
 </html>

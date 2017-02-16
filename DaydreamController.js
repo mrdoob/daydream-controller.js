@@ -34,7 +34,7 @@ function DaydreamController() {
 
 		var data = event.target.value;
 
-		// http://stackoverflow.com/questions/40730809/use-daydream-controller-on-hololens-or-outside-daydream
+		// http://stackoverflow.com/questions/40730809/use-daydream-controller-on-hololens-or-outside-daydream/40753551#40753551
 
 		state.isClickDown = (data.getUint8(18) & 0x1) > 0;
 		state.isAppDown = (data.getUint8(18) & 0x4) > 0;
