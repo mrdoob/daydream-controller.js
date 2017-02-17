@@ -25,7 +25,7 @@ function DaydreamController() {
 		} )
 		.then( function ( characteristic ) {
 			characteristic.addEventListener( 'characteristicvaluechanged', handleData );
-			characteristic.startNotifications();
+			return characteristic.startNotifications();
 		} )
 
 	}
