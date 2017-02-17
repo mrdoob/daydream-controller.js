@@ -29,19 +29,11 @@
 
 					textarea.textContent = JSON.stringify( state, null, '\t' );
 
-					var xGyro = state.xGyro * (2048 / 180 * Math.PI / 4095.0);
-					var yGyro = state.yGyro * (2048 / 180 * Math.PI / 4095.0);
-					var zGyro = state.zGyro * (2048 / 180 * Math.PI / 4095.0);
-
-					var xAcc = state.xAcc * (8 * 9.8 / 4095.0);
-					var yAcc = state.yAcc * (8 * 9.8 / 4095.0);
-					var zAcc = state.zAcc * (8 * 9.8 / 4095.0);
-
-					var xOri = state.xOri * (2 * Math.PI / 4095.0);
-					var yOri = state.yOri * (2 * Math.PI / 4095.0);
-					var zOri = state.zOri * (2 * Math.PI / 4095.0);
-
-					sensorfusion.update( xGyro, yGyro, zGyro, xAcc, yAcc, zAcc, xOri, yOri, zOri );
+					sensorfusion.update(
+						state.xGyro, state.yGyro, state.zGyro,
+						state.xAcc, state.yAcc, state.zAcc,
+						state.xOri, state.yOri, state.zOri
+					);
 
 					if ( mesh !== undefined ) {
 
