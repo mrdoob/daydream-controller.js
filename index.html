@@ -18,7 +18,8 @@
 
 		<script>
 
-			var mesh;
+			var mesh, button1, button2, button3, touch;
+
 			var sensorfusion = new MadgwickAHRS();
 			sensorfusion.setQuaternion( [ 0.7071067811865475, 0, 0, 0.7071067811865475 ] ); // Hack-ish: Rotate internal quaternion
 
@@ -40,9 +41,14 @@
 						mesh.quaternion.fromArray( sensorfusion.getQuaternion() );
 						mesh.rotation.x -= Math.PI / 2; // Hack: Don't know how to change rotate gyro/acc/ori.
 
-						mesh.children[ 0 ].material.emissive.r = state.isClickDown ? 1 : 0;
-						mesh.children[ 1 ].material.emissive.r = state.isAppDown ? 1 : 0;
-						mesh.children[ 2 ].material.emissive.r = state.isHomeDown ? 1 : 0;
+						button1.material.emissive.g = state.isClickDown ? 1 : 0;
+						button2.material.emissive.g = state.isAppDown ? 1 : 0;
+						button3.material.emissive.g = state.isHomeDown ? 1 : 0;
+
+						touch.position.x = ( state.xTouch * 2 - 1 ) / 1000;
+						touch.position.y = - ( state.yTouch * 2 - 1 ) / 1000;
+
+						touch.visible = state.xTouch > 0 && state.yTouch > 0;
 
 					}
 
@@ -79,24 +85,30 @@
 				scene.add( mesh );
 
 				var geometry = new THREE.CircleBufferGeometry( 0.00166, 24 );
-				var button = new THREE.Mesh( geometry, material.clone() );
-				button.position.y = 0.0002;
-				button.position.z = - 0.0035;
-				button.rotation.x = - Math.PI / 2;
-				mesh.add( button );
+				button1 = new THREE.Mesh( geometry, material.clone() );
+				button1.position.y = 0.0002;
+				button1.position.z = - 0.0035;
+				button1.rotation.x = - Math.PI / 2;
+				mesh.add( button1 );
+
+				var geometry = new THREE.CircleBufferGeometry( 0.00025, 24 );
+				touch = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { blending: THREE.AdditiveBlending, opacity: 0.2, transparent: true } ) );
+				touch.position.z = 0.0001;
+				touch.visible = false;
+				button1.add( touch );
 
 				var geometry = new THREE.CircleBufferGeometry( 0.0005, 24 );
-				var button = new THREE.Mesh( geometry, material.clone() );
-				button.position.y = 0.0002;
-				button.position.z = - 0.0008;
-				button.rotation.x = - Math.PI / 2;
-				mesh.add( button );
+				button2 = new THREE.Mesh( geometry, material.clone() );
+				button2.position.y = 0.0002;
+				button2.position.z = - 0.0008;
+				button2.rotation.x = - Math.PI / 2;
+				mesh.add( button2 );
 
-				var button = new THREE.Mesh( geometry, material.clone() );
-				button.position.y = 0.0002;
-				button.position.z = 0.0008;
-				button.rotation.x = - Math.PI / 2;
-				mesh.add( button );
+				button3 = new THREE.Mesh( geometry, material.clone() );
+				button3.position.y = 0.0002;
+				button3.position.z = 0.0008;
+				button3.rotation.x = - Math.PI / 2;
+				mesh.add( button3 );
 
 			} );
 
