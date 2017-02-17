@@ -8,7 +8,7 @@ function DaydreamController() {
 
 	function connect() {
 
-		navigator.bluetooth.requestDevice( {
+		return navigator.bluetooth.requestDevice( {
 			filters: [ {
 				name: 'Daydream controller'
 			} ],
