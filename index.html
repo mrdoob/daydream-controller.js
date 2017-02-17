@@ -6,7 +6,7 @@
 	<body>
 
 		<h1>daydream-controller.js</h1>
-		<button id="button">CONNECT</button><br /><br />
+		<button id="button">CONNECT</button><span id="message"></span><br /><br />
 		<textarea id="textarea" rows="23" cols="50"></textarea>
 		<canvas id="canvas" width="400", height="300"></canvas><br /><br />
 		<a href="https://github.com/mrdoob/daydream-controller.js/">Source</a> -
@@ -18,7 +18,12 @@
 
 		<script>
 
-			var mesh, button1, button2, button3, touch;
+			if ( 'bluetooth' in navigator === false ) {
+
+				button.style.display = 'none';
+				message.textContent = 'This browser doesn\'t support the Web Bluetooth API :(';
+
+			}
 
 			var sensorfusion = new MadgwickAHRS();
 			sensorfusion.setQuaternion( [ 0.7071067811865475, 0, 0, 0.7071067811865475 ] ); // Hack-ish: Rotate internal quaternion
@@ -75,6 +80,8 @@
 
 			var camera = new THREE.PerspectiveCamera( 50, canvas.width / canvas.height, 0.001, 10 );
 			camera.position.z = 0.015;
+
+			var mesh, button1, button2, button3, touch;
 
 			var loader = new THREE.BufferGeometryLoader()
 			loader.load( 'files/daydream.json', function ( geometry ) {
