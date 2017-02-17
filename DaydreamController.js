@@ -8,7 +8,7 @@ function DaydreamController() {
 
 	function connect() {
 
-		navigator.bluetooth.requestDevice( {
+		return navigator.bluetooth.requestDevice( {
 			filters: [ {
 				name: 'Daydream controller'
 			} ],
@@ -25,7 +25,7 @@ function DaydreamController() {
 		} )
 		.then( function ( characteristic ) {
 			characteristic.addEventListener( 'characteristicvaluechanged', handleData );
-			characteristic.startNotifications();
+			return characteristic.startNotifications();
 		} )
 
 	}
