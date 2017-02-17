@@ -46,9 +46,9 @@
 						mesh.quaternion.fromArray( sensorfusion.getQuaternion() );
 						mesh.rotation.x -= Math.PI / 2; // Hack: Don't know how to change rotate gyro/acc/ori.
 
-						button1.material.emissive.g = state.isClickDown ? 1 : 0;
-						button2.material.emissive.g = state.isAppDown ? 1 : 0;
-						button3.material.emissive.g = state.isHomeDown ? 1 : 0;
+						button1.material.emissive.g = state.isClickDown ? 0.5 : 0;
+						button2.material.emissive.g = state.isAppDown ? 0.5 : 0;
+						button3.material.emissive.g = state.isHomeDown ? 0.5 : 0;
 
 						touch.position.x = ( state.xTouch * 2 - 1 ) / 1000;
 						touch.position.y = - ( state.yTouch * 2 - 1 ) / 1000;
@@ -70,12 +70,16 @@
 			var scene = new THREE.Scene();
 			scene.background = new THREE.Color( 0xeeeeee );
 
-			var light = new THREE.HemisphereLight( 0xaaaaff, 0x806060, 0.5 );
+			var light = new THREE.HemisphereLight( 0xddddff, 0x808080, 0.7 );
 			light.position.set( 0, 1, 0 );
 			scene.add( light );
 
-			var light = new THREE.DirectionalLight( 0xffffff, 0.8 );
+			var light = new THREE.DirectionalLight( 0xffffff, 0.6 );
 			light.position.set( 1, 1, 1 );
+			scene.add( light );
+
+			var light = new THREE.DirectionalLight( 0xffffff, 0.4 );
+			light.position.set( 1, -1, 1 );
 			scene.add( light );
 
 			var camera = new THREE.PerspectiveCamera( 50, canvas.width / canvas.height, 0.001, 10 );
@@ -86,7 +90,7 @@
 			var loader = new THREE.BufferGeometryLoader()
 			loader.load( 'files/daydream.json', function ( geometry ) {
 
-				var material = new THREE.MeshPhongMaterial( { color: 0x888888, side: THREE.DoubleSide } );
+				var material = new THREE.MeshPhongMaterial( { color: 0x888899, shininess: 15, side: THREE.DoubleSide } );
 				mesh = new THREE.Mesh( geometry, material );
 				mesh.rotation.x = Math.PI / 2;
 				scene.add( mesh );
