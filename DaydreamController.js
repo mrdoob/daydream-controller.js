@@ -12,13 +12,13 @@ function DaydreamController() {
 			filters: [ {
 				name: 'Daydream controller'
 			} ],
-			optionalServices: [ '0000fe55-0000-1000-8000-00805f9b34fb' ]
+			optionalServices: [ 0xfe55 ]
 		} )
 		.then( function ( device ) {
 			return device.gatt.connect();
 		} )
 		.then( function ( server ) {
-			return server.getPrimaryService( '0000fe55-0000-1000-8000-00805f9b34fb' );
+			return server.getPrimaryService( 0xfe55 );
 		} )
 		.then( function ( service ) {
 			return service.getCharacteristic( '00000001-1000-1000-8000-00805f9b34fb' );
