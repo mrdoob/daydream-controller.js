@@ -6,17 +6,19 @@
 	<body>
 
 		<h1>daydream-controller.js</h1>
+		<a>Hold home key for one second to recenter </a>
 		<button id="button">CONNECT</button><span id="message"></span><br /><br />
-		<textarea id="textarea" rows="23" cols="50"></textarea>
 		<canvas id="canvas" width="400", height="300"></canvas><br /><br />
 		<a href="https://github.com/mrdoob/daydream-controller.js/">Source</a> -
 		<a href="https://vr.google.com/daydream/headset/">Daydream View</a>
 
 		<script src="files/three.min.js"></script>
-		<script src="files/MadgwickAHRS.js"></script>
 		<script src="DaydreamController.js"></script>
 
 		<script>
+			var qHome = new THREE.Quaternion();
+			var resetTime = 0;
+			var lastTime = 0;
 
 			if ( 'bluetooth' in navigator === false ) {
 
@@ -24,27 +26,31 @@
 				message.textContent = 'This browser doesn\'t support the Web Bluetooth API :(';
 
 			}
-
-			var sensorfusion = new MadgwickAHRS();
-			sensorfusion.setQuaternion( [ 0.7071067811865475, 0, 0, 0.7071067811865475 ] ); // Hack-ish: Rotate internal quaternion
-
 			button.addEventListener( 'click', function () {
 
 				var controller = new DaydreamController();
 				controller.onStateChange( function ( state ) {
 
-					textarea.textContent = JSON.stringify( state, null, '\t' );
-
-					sensorfusion.update(
-						state.xGyro, state.yGyro, state.zGyro,
-						state.xAcc, state.yAcc, state.zAcc,
-						state.xOri, state.yOri, state.zOri
-					);
-
 					if ( mesh !== undefined ) {
+			      var angle = Math.sqrt(state.xOri*state.xOri + state.yOri*state.yOri + state.zOri*state.zOri);
+			      var q = new THREE.Quaternion();
+			      if(angle>0.0){
+			      	var scale = 1/angle;
+			        q.setFromAxisAngle(new THREE.Vector3(state.xOri*scale, state.yOri*scale, state.zOri*scale), angle);
+			      } // else q.set(0,0,0,1);
+			     	if(state.isHomeDown){
+			     		var t = state.time - lastTime;
+			     		lastTime = state.time;
+			     		if(t<0)t+=500; // state.time counts up to 500, then starts over
+			     		resetTime += t;
+			     		if(resetTime>1000){ // one second
+            		qHome.copy(q);
+            		qHome.inverse();			     			
+			     		}
+			     	}else resetTime = 0;
 
-						mesh.quaternion.fromArray( sensorfusion.getQuaternion() );
-						mesh.rotation.x -= Math.PI / 2; // Hack: Don't know how to change rotate gyro/acc/ori.
+			     	mesh.quaternion.copy(qHome);
+			     	mesh.quaternion.multiply(q);
 
 						button1.material.emissive.g = state.isClickDown ? 0.5 : 0;
 						button2.material.emissive.g = state.isAppDown ? 0.5 : 0;
