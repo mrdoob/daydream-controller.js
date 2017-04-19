@@ -6,10 +6,10 @@
 	<body>
 
 		<h1>daydream-controller.js</h1>
-		<button id="button">CONNECT</button><span id="message"></span>
-		(Hold home key for 1 second to recenter)<br /><br />
+		<button id="button">CONNECT</button><span id="message"></span><br /><br />
 		<textarea id="textarea" rows="23" cols="50"></textarea>
 		<canvas id="canvas" width="400", height="300"></canvas><br /><br />
+		(Hold home key for 1 second to recenter)<br /><br />
 		<a href="https://github.com/mrdoob/daydream-controller.js/">Source</a> -
 		<a href="https://vr.google.com/daydream/headset/">Daydream View</a>
 
@@ -21,7 +21,7 @@
 			if ( 'bluetooth' in navigator === false ) {
 
 				button.style.display = 'none';
-				message.textContent = 'This browser doesn\'t support the Web Bluetooth API :(';
+				message.innerHTML = 'This browser doesn\'t support the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API" target="_blank">Web Bluetooth API</a> :(';
 
 			}
 
